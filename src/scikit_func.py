@@ -5,7 +5,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import roc_curve, roc_auc_score, confusion_matrix
+from sklearn.metrics import roc_curve, roc_auc_score, confusion_matrix, f1_score
 
 
 def load_data():
@@ -56,9 +56,10 @@ def trigger_classifier(classifier, params, X_train, X_test, y_train, y_test):
         # Calculate ROC, feature importances, and confusion matrix
         feature_importances = model.feature_importances_
         fpr, tpr, thresholds = roc_curve(y_test, model.predict_proba(X_test)[:, 1])
+        f1 = f1_score(y_test, model.predict(X_test))
         auc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
         confusion_mat = confusion_matrix(y_test, model.predict(X_test))
-        return accuracy, feature_importances, fpr, tpr, thresholds, auc, confusion_mat
+        return accuracy, feature_importances, fpr, tpr, thresholds, f1, auc, confusion_mat
 
     elif classifier == 'SVM':
         model = get_model(classifier, params)  # Instantiate SVM model
@@ -66,9 +67,10 @@ def trigger_classifier(classifier, params, X_train, X_test, y_train, y_test):
         accuracy = model.score(X_test, y_test)  # Calculate accuracy
         feature_importances = None
         fpr, tpr, thresholds = roc_curve(y_test, model.decision_function(X_test))
+        f1 = f1_score(y_test, model.predict(X_test))
         auc = roc_auc_score(y_test, model.decision_function(X_test))
         confusion_mat = confusion_matrix(y_test, model.predict(X_test))
-        return accuracy, feature_importances, fpr, tpr, thresholds, auc, confusion_mat
+        return accuracy, feature_importances, fpr, tpr, thresholds, f1, auc, confusion_mat
 
     elif classifier == 'Random Forest':
         model = get_model(classifier, params)  # Instantiate Random Forest model
@@ -76,9 +78,10 @@ def trigger_classifier(classifier, params, X_train, X_test, y_train, y_test):
         accuracy = model.score(X_test, y_test)  # Calculate accuracy
         feature_importances = model.feature_importances_
         fpr, tpr, thresholds = roc_curve(y_test, model.predict_proba(X_test)[:, 1])
+        f1 = f1_score(y_test, model.predict(X_test))
         auc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
         confusion_mat = confusion_matrix(y_test, model.predict(X_test))
-        return accuracy, feature_importances, fpr, tpr, thresholds, auc, confusion_mat
+        return accuracy, feature_importances, fpr, tpr, thresholds, f1, auc, confusion_mat
     
     elif classifier == 'XGBoost':
         model = get_model(classifier, params)  # Instantiate XGBoost model
@@ -86,6 +89,7 @@ def trigger_classifier(classifier, params, X_train, X_test, y_train, y_test):
         accuracy = model.score(X_test, y_test)  # Calculate accuracy
         feature_importances = None  # XGBoost doesn't provide feature importances
         fpr, tpr, thresholds = roc_curve(y_test, model.predict_proba(X_test)[:, 1])
+        f1 = f1_score(y_test, model.predict(X_test))
         auc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
         confusion_mat = confusion_matrix(y_test, model.predict(X_test))
-        return accuracy, feature_importances, fpr, tpr, thresholds, auc, confusion_mat
+        return accuracy, feature_importances, fpr, tpr, thresholds, f1, auc, confusion_mat
