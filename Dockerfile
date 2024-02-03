@@ -1,5 +1,5 @@
 # Use a specific Python version to ensure consistency
-FROM python:3.11.6-slim-bullseye
+FROM python:3.10.6-slim
 
 # Update package repositories and install necessary dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -17,10 +17,12 @@ COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+#RUN pip install -r requirements.txt
 
 # Copy the entire application source code and resources
 COPY src/ ./src/
 COPY resource/ ./resource/
+COPY tests/ ./tests/
 
 # Set environment variables
 ENV PYSPARK_PYTHON=python3
