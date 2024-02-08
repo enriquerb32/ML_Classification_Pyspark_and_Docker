@@ -1,10 +1,7 @@
 import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
-from pyspark.ml.classification import DecisionTreeClassifier, RandomForestClassifier
-from pyspark.ml.feature import VectorAssembler
-from pyspark.ml.linalg import Vectors
-from src.pyspark_func import prepare_dataset_spark, training
+from src.pyspark_func import training, prepare_dataset_spark
 
 # Fixture to create a SparkSession
 @pytest.fixture(scope="session")
@@ -16,33 +13,25 @@ def spark_session():
     yield spark
     spark.stop()
 
-# Fixture to create a sample DataFrame for testing
-@pytest.fixture(scope="session")
-def sample_data(spark_session):
-    schema = StructType([
-        StructField("age", IntegerType(), True),
-        StructField("gender", StringType(), True),
-        StructField("height", IntegerType(), True),
-        StructField("weight", IntegerType(), True),
-        StructField("ap_hi", IntegerType(), True),
-        StructField("ap_lo", IntegerType(), True),
-        StructField("cholesterol", IntegerType(), True),
-        StructField("gluc", IntegerType(), True),
-        StructField("smoke", IntegerType(), True),
-        StructField("alco", IntegerType(), True),
-        StructField("active", IntegerType(), True),
-        StructField("cardio", IntegerType(), True)
-    ])
-    data = [
-        (50, 'M', 170, 80, 120, 80, 1, 1, 0, 0, 1, 1),
-        (55, 'F', 160, 70, 140, 90, 3, 3, 1, 1, 1, 0)
-    ]
-    return spark_session.createDataFrame(data, schema)
-
-def test_prepare_dataset_spark(spark_session, sample_data):
-    train_data, test_data = prepare_dataset_spark(spark_session, sample_data)
-    assert train_data.count() > 0
-    assert test_data.count() > 0
+# Fixture to load sample data
+@pytest.fixture
+def sample_data():
+    return [(50, 'M', 170, 80, 120, 80, 1, 1, 0, 0, 1, 1),
+        (55, 'F', 160, 70, 140, 90, 3, 3, 1, 1, 1, 0),
+        (60, 'F', 160, 70, 140, 90, 3, 3, 1, 1, 1, 1),
+        (25, 'F', 160, 70, 140, 90, 3, 3, 1, 1, 1, 0),
+        (75, 'F', 160, 70, 140, 90, 3, 3, 1, 1, 1, 1),
+        (51, 'F', 160, 70, 140, 90, 3, 3, 1, 1, 1, 0),
+        (50, 'F', 160, 70, 140, 90, 3, 3, 1, 1, 1, 1),
+        (85, 'F', 160, 70, 140, 90, 3, 3, 1, 1, 1, 1),
+        (15, 'F', 160, 70, 140, 90, 3, 3, 1, 1, 1, 0),
+        (25, 'F', 160, 70, 140, 90, 3, 3, 1, 1, 1, 0)]
+    
+def test_prepare_dataset_spark(spark_session, sample_data):  
+    trainingData, testData = prepare_dataset_spark(spark_session, sample_data)
+    assert trainingData.count() > 0
+    assert testData.count() > 0
+    return trainingData, testData
 
 def test_training(spark_session, sample_data):
     train_data, test_data = prepare_dataset_spark(spark_session, sample_data)

@@ -12,11 +12,11 @@ def spark_session():
 def test_integration(spark_session):
     try:
         # Load data using scikit_func
-        sf_df = sf.load_data().drop("id")
+        sf_df = sf.load_data()
 
         # Prepare and train using PySpark functions
         train_df, test_df = psf.prepare_dataset_spark(spark_session, sf_df)
-        accuracy = psf.training(spark_session, train_df, test_df)
+        accuracy, _, _, _, _, _, _ = psf.training(spark_session, 'Decision Tree', train_df, test_df)
 
         assert accuracy >= 0.0 and accuracy <= 1.0
 

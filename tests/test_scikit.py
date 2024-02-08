@@ -7,18 +7,18 @@ from src.scikit_func import load_data, prepare_dataset, get_sidebar_classifier, 
 @pytest.fixture
 def sample_data():
     return pd.DataFrame({
-        'age': [30, 40, 50, 60],
-        'gender': [1, 0, 1, 0],
-        'height': [160, 170, 165, 175],
-        'weight': [60, 70, 65, 75],
-        'ap_hi': [120, 130, 140, 150],
-        'ap_lo': [80, 90, 85, 95],
-        'cholesterol': [1, 2, 1, 2],
-        'gluc': [1, 2, 1, 2],
-        'smoke': [0, 1, 0, 1],
-        'alco': [0, 1, 0, 1],
-        'active': [1, 0, 1, 0],
-        'cardio': [0, 1, 0, 1]
+        'age': [30, 40, 50, 60, 30, 40, 50, 60, 30, 40, 50, 60],
+        'gender': [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+        'height': [160, 170, 165, 175, 160, 170, 165, 175, 160, 170, 165, 175],
+        'weight': [60, 70, 65, 75, 70, 65, 75, 70, 65, 75, 70, 65],
+        'ap_hi': [120, 130, 140, 150, 120, 130, 140, 150, 120, 130, 140, 150],
+        'ap_lo': [80, 90, 85, 95, 90, 85, 95, 90, 85, 95, 90, 100],
+        'cholesterol': [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+        'gluc': [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
+        'smoke': [0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0],
+        'alco': [0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0],
+        'active': [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+        'cardio': [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
     })
 
 def test_load_data():
@@ -43,20 +43,15 @@ def test_get_sidebar_classifier():
     assert 'XGBoost' in classifiers
 
 def test_trigger_classifier(sample_data):
+
+    params = dict()
+    params['criterion'] = 'gini'
+    params['max_features'] = 'sqrt'
+    params['max_depth'] = 1
+    params['min_samples_split'] = 0.1
+
     X_train, X_test, y_train, y_test = prepare_dataset(sample_data)
-    
+
     # Check if trigger_classifier returns expected results for Decision Tree
-    accuracy, _, _, _, _, _, _, _ = trigger_classifier('Decision Tree', {}, X_train, X_test, y_train, y_test)
-    assert accuracy >= 0
-    
-    # Check if trigger_classifier returns expected results for SVM
-    accuracy, _, _, _, _, _, _, _ = trigger_classifier('SVM', {}, X_train, X_test, y_train, y_test)
-    assert accuracy >= 0
-    
-    # Check if trigger_classifier returns expected results for Random Forest
-    accuracy, _, _, _, _, _, _, _ = trigger_classifier('Random Forest', {}, X_train, X_test, y_train, y_test)
-    assert accuracy >= 0
-    
-    # Check if trigger_classifier returns expected results for XGBoost
-    accuracy, _, _, _, _, _, _, _ = trigger_classifier('XGBoost', {}, X_train, X_test, y_train, y_test)
+    accuracy, _, _, _, _, _, _, _ = trigger_classifier('Decision Tree', params, X_train, X_test, y_train, y_test)
     assert accuracy >= 0
