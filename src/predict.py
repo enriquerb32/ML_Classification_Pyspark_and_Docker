@@ -1,49 +1,73 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
-from sklearn import tree
+import matplotlib.pyplot as plt
+from pyspark.ml.classification import DecisionTreeClassifier, RandomForestClassifier
+from pyspark.ml.feature import Imputer, VectorAssembler
+from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql.functions import col, round, lit
+from pyspark.ml.stat import Correlation
+from pyspark.sql.types import DoubleType
+from pyspark.mllib.evaluation import MulticlassMetrics
+from pyspark.mllib.evaluation import BinaryClassificationMetrics
+from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
+from pyspark.ml.evaluation import BinaryClassificationEvaluator
 import pyspark_func as psf
-import scikit_func as sf
 
-# Load your data
-df_csv = sf.load_data()
+def _predictor(spark, df):
+    # Create a new row of data (replace this with your own data)
+    df_new = spark.createDataFrame([
+        (40, 1, 163, 90, 135, 85, 1, 1, 0, 1, 0)
+    ], ["age", "gender", "height", "weight", "ap_hi", "ap_lo", "cholesterol", "gluc", "smoke", "alco", "active"])
 
-# Create a new row of data (replace this with your own data)
-df_new = pd.DataFrame({
-    'age': [66],
-    'gender': [2],
-    'height': [176],
-    'weight': [59],
-    'ap_hi': [120],
-    'ap_lo': [80],
-    'cholesterol': [2],
-    'gluc': [1],
-    'smoke': [0],
-    'alco': [0],
-    'active': [1],
-    'cardio': [np.nan]
-})
+    # Calculate BMI and MAP
+    df_new = df_new.withColumn("bmi", df_new['weight'] / (df_new['height'] ** 2))
+    df_new = df_new.withColumn("map", (2 * df_new['ap_lo'] + df_new['ap_hi']) / 3)
 
-# Preprocess the main data
-X_train, X_test, y_train, y_test = sf.prepare_dataset(df_csv)
+    # Calculate a fictitious "cardio" column to match the columns of the training dataset
+    df_new = df_new.withColumn("cardio", lit(9999))
 
-# Preprocess the new data
-df = pd.concat([df_csv, df_new], ignore_index=True)
-X_df = df.drop(columns=['cardio'])
-scalar = MinMaxScaler()
-X_df1 = scalar.fit_transform(X_df)
-lastrow = X_df1[-1]
+    # Drop unnecessary columns
+    columns_to_drop = ['weight', 'height', 'ap_hi', 'ap_lo']
+    df_new = df_new.drop(*columns_to_drop)
 
-# We set the hyperparameters of our prediction
-params = dict()
-params['criterion'] = 'mse'
-params['max_features'] = 'sqrt'
-params['max_depth'] = 1
-params['min_samples_split'] = 0.1
+    # Generate a range of ages from the imputed age to 100 with a step of 1 between elements
+    agerange = list(range(40, 66))
 
-model = tree.DecisionTreeRegressor()
-model = model.fit(X_train, y_train)
-result = model.predict([lastrow])
+    # Replicate new data for each age
+    df_replicated = df_new.crossJoin(spark.range(len(agerange)).withColumnRenamed("id", "idx"))
+    df_replicated = df_replicated.withColumn("age", df_replicated.age + df_replicated.idx)
+    df_replicated = df_replicated.drop("idx")
 
-print(f"Scikit-learn Prediction: {result}")
-#print(f"PySpark Prediction: {prediction_pyspark}")
+    # Assemble features into a single vector column and perform the preprocessing
+    feature_columns = ['age', 'gender', 'bmi', 'map', 'cholesterol', 'gluc', 'smoke', 'alco', 'active']
+    assembler = VectorAssembler(inputCols=feature_columns, outputCol="features")
+    df_replicated = assembler.transform(df_replicated).select('features', 'cardio')
+    df_replicated = df_replicated.withColumn('cardio', df_replicated['cardio'].cast(DoubleType()))
+
+    # Define classifiers
+    rf = RandomForestClassifier(labelCol="cardio", featuresCol="features")
+
+    # Define hyperparameter grid for Random Forest
+    paramGrid_rf = ParamGridBuilder() \
+        .addGrid(rf.featureSubsetStrategy, ['auto', 'sqrt']) \
+        .addGrid(rf.maxDepth, list(range(2, 25))) \
+        .addGrid(rf.numTrees, [int(500 * np.random.power(1)) for _ in range(3)]) \
+        .addGrid(rf.impurity, ['gini', 'entropy']) \
+        .build()
+
+    # Define evaluator
+    evaluator = BinaryClassificationEvaluator(metricName="areaUnderROC").setLabelCol("cardio")
+
+    # Define cross-validator
+    cv = CrossValidator(estimator=rf,
+                        estimatorParamMaps=paramGrid_rf,
+                        evaluator=evaluator,
+                        numFolds=3)
+
+    # Train and evaluate models using the combined pipeline
+    cv_models = cv.fit(df)
+
+    # Make predictions
+    predictions = cv_models.transform(df_replicated)
+
+    return predictions
