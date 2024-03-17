@@ -42,7 +42,7 @@ Contributions to this project are welcome! Feel free to fork the repository and 
 
 * Adding support for more machine learning algorithms
 * Enhancing the user interface with additional visualizations and interactivity
-* Integrating advanced model evaluation techniques and hyperparameter tuning, either UI-based or optimising it on the code
+* Integrating advanced model evaluation techniques and hyperparameter tuning, either through a UI-based approach or optimizing it in the code. The 'predict.py' script is included in the 'Extra' directory, demonstrating how to utilize a cross-validator with a random search of hyperparameters. It has not been included in the Streamlit app due to longer loading times, in addition to providing the option to tune the hyperparameters directly within the web app
 
 ## License
 
