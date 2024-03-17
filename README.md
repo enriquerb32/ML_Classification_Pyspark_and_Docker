@@ -5,11 +5,7 @@
 ![](extra/StreamlitML.gif)
 
 ## Objective
-1. How easy is it to create a Web App using Streamlit
-2. Integrating multiple #machinelearning technologies in the same app
-3. Code reusability
-4. Streamlit functions & feature usage
-Streamlit Healthcare ML Data App is a comprehensive machine learning application developed in Python using Streamlit, pandas, NumPy, seaborn, Plotly, Matplotlib, scikit-learn, and PySpark. The application aims to analyze a cardiovascular disease dataset sourced from Kaggle, comprising 70,000 patient records with 11 features. By leveraging both Scikit Learn and PySpark ML libraries, the app provides users with a seamless comparison and selection of machine learning models for predicting cardiovascular disease risk. PySpark is mainly used in this project (with Decision Tree and Random Forest algorithms), 
+The aim of this project is to build a PySpark ML model to analyze medical data for predictive purposes. Therefore, the data preprocessing includes transformations of its variables to improve the explainability of the entire model. Despite our main focus on PySpark, most of the calculations and plots are replicated using Scikit Learn ML packages. This approach allows us to identify differences in the statistical results by simply changing the Python packages. PySpark modules utilize Decision Tree and Random Forest algorithms, while Scikit Learn incorporates these two algorithms as well as SVM and XGBoost.
 
 ## Key Features
 * Interactive Interface: Explore and visualize the dataset's features, correlations, and distributions through an intuitive Streamlit interface.
@@ -39,15 +35,6 @@ docker build --tag streamlit-healthcare:1.0 .
 docker run -it -p 8501:8501 streamlit-healthcare:1.0
 ```
 3. Browse the [url](http://localhost:8501)
-
-## Features
-* Load Healthcare data from Kaggle https://www.kaggle.com/sulianova/cardiovascular-disease-dataset
-* Use __scikit-learn__ ML lib to run classification.
-* Provide Tuning param options in the UI 
-* Provide Switch to enable __PySpark__
-* Provide Pyspark MLlib options over the same data, technically one can compare 
-the result between 2 seperate libraries
-* Plotting using Seaborn chart
 
 ## Contributions and Future Enhancements
 
