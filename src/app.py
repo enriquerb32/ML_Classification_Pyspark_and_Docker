@@ -110,7 +110,7 @@ def main():
         st.write(f"F1 Score: {sk_f1}")
         st.write(f"AUC: {sk_auc}")      
 
-        if feature_importances is not None:
+        if sk_feature_importances is not None:
             st.subheader("Feature Importances")
             features_data = pd.DataFrame({'Feature': X_test.columns, 'Importance': sk_feature_importances.tolist()})
             st.bar_chart(features_data, x='Feature', y='Importance')

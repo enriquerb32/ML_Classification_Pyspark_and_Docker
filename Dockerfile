@@ -35,12 +35,12 @@ COPY pyproject.toml ./
 ENV PYSPARK_PYTHON=python3
 
 # Run tests to enhance an automated continuous integration
-#RUN python3 -m pytest tests/ && \
-    #python3 -m flake8 src/ && \
-    #python3 -m isort src/ --check && \
-    #python3 -m black src/ --check --quiet && \
-    #python3 -m pylint src/ --disable=C0114,C0116,R1705 && \
-    #python3 -m bandit -r src/ --quiet
+RUN python3 -m pytest tests/ && \
+    python3 -m flake8 src/ && \
+    python3 -m isort src/ --check && \
+    python3 -m black src/ --check --quiet && \
+    python3 -m pylint src/ --disable=C0114,C0116,R1705 && \
+    python3 -m bandit -r src/ --quiet
 
 # Command to run the application
 CMD ["streamlit", "run", "src/app.py"]

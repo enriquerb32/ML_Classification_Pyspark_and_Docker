@@ -1,7 +1,6 @@
 import pytest
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from src.scikit_func import load_data, prepare_dataset, get_sidebar_classifier, trigger_classifier
+from src.scikit_func import _load_data, _prepare_dataset, _get_sidebar_classifier, _trigger_classifier
 
 # Fixture to load sample data
 @pytest.fixture
@@ -23,19 +22,19 @@ def sample_data():
 
 def test_load_data():
     # Check if data is loaded as expected
-    df = load_data()
+    df = _load_data()
     assert isinstance(df, pd.DataFrame)
     assert not df.empty
 
 def test_prepare_dataset(sample_data):
     # Check if dataset is prepared correctly
-    X_train, X_test, y_train, y_test = prepare_dataset(sample_data)
+    X_train, X_test, y_train, y_test = _prepare_dataset(sample_data)
     assert X_train.shape[0] == y_train.shape[0]
     assert X_test.shape[0] == y_test.shape[0]
 
 def test_get_sidebar_classifier():
     # Check if classifiers are returned correctly
-    classifiers = get_sidebar_classifier()
+    classifiers = _get_sidebar_classifier()
     assert isinstance(classifiers, tuple)
     assert 'Decision Tree' in classifiers
     assert 'SVM' in classifiers
@@ -50,8 +49,8 @@ def test_trigger_classifier(sample_data):
     params['max_depth'] = 1
     params['min_samples_split'] = 0.1
 
-    X_train, X_test, y_train, y_test = prepare_dataset(sample_data)
+    X_train, X_test, y_train, y_test = _prepare_dataset(sample_data)
 
     # Check if trigger_classifier returns expected results for Decision Tree
-    accuracy, _, _, _, _, _, _, _ = trigger_classifier('Decision Tree', params, X_train, X_test, y_train, y_test)
+    accuracy, _, _, _, _, _, _, _ = _trigger_classifier('Decision Tree', params, X_train, X_test, y_train, y_test)
     assert accuracy >= 0

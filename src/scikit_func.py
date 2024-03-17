@@ -8,15 +8,15 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import roc_curve, roc_auc_score, confusion_matrix, f1_score
 
 
-def load_data():
+def _load_data():
     return pd.read_csv("resource/cardio_train.csv", sep=';')
 
 
-def get_sidebar_classifier():
+def _get_sidebar_classifier():
     return 'Decision Tree', 'SVM', 'Random Forest', 'XGBoost'
 
 
-def prepare_dataset(dataframe):
+def _prepare_dataset(dataframe):
     X = dataframe.drop(columns=['cardio'])
     y = dataframe['cardio']
     scalar = MinMaxScaler()
@@ -24,7 +24,7 @@ def prepare_dataset(dataframe):
     return train_test_split(x_scaled, y, test_size=0.30, random_state=9)
 
 
-def get_model(classifier, params):
+def _get_model(classifier, params):
     default_params = {
         'criterion': 'gini',
         'max_features': None,
@@ -48,9 +48,9 @@ def get_model(classifier, params):
         return GradientBoostingClassifier(n_estimators=90)
 
 
-def trigger_classifier(classifier, params, X_train, X_test, y_train, y_test):
+def _trigger_classifier(classifier, params, X_train, X_test, y_train, y_test):
     if classifier == 'Decision Tree':
-        model = get_model(classifier, params)
+        model = _get_model(classifier, params)
         model.fit(X_train, y_train)
         accuracy = model.score(X_test, y_test)
         # Calculate ROC, feature importances, and confusion matrix
@@ -62,7 +62,7 @@ def trigger_classifier(classifier, params, X_train, X_test, y_train, y_test):
         return accuracy, feature_importances, fpr, tpr, thresholds, f1, auc, confusion_mat
 
     elif classifier == 'SVM':
-        model = get_model(classifier, params)  # Instantiate SVM model
+        model = _get_model(classifier, params)  # Instantiate SVM model
         model.fit(X_train, y_train)  # Fit the model
         accuracy = model.score(X_test, y_test)  # Calculate accuracy
         feature_importances = None
@@ -73,7 +73,7 @@ def trigger_classifier(classifier, params, X_train, X_test, y_train, y_test):
         return accuracy, feature_importances, fpr, tpr, thresholds, f1, auc, confusion_mat
 
     elif classifier == 'Random Forest':
-        model = get_model(classifier, params)  # Instantiate Random Forest model
+        model = _get_model(classifier, params)  # Instantiate Random Forest model
         model.fit(X_train, y_train)  # Fit the model
         accuracy = model.score(X_test, y_test)  # Calculate accuracy
         feature_importances = model.feature_importances_
@@ -84,7 +84,7 @@ def trigger_classifier(classifier, params, X_train, X_test, y_train, y_test):
         return accuracy, feature_importances, fpr, tpr, thresholds, f1, auc, confusion_mat
     
     elif classifier == 'XGBoost':
-        model = get_model(classifier, params)  # Instantiate XGBoost model
+        model = _get_model(classifier, params)  # Instantiate XGBoost model
         model.fit(X_train, y_train)  # Fit the model
         accuracy = model.score(X_test, y_test)  # Calculate accuracy
         feature_importances = None  # XGBoost doesn't provide feature importances

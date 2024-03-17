@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 from pyspark.sql import SparkSession
-from src.pyspark_func import training, prepare_dataset_spark
+from src.pyspark_func import _training, _clean_dataset, _remove_outliers, _attribute_combination, _prepare_train_test
 
 # Fixture to create a SparkSession
 @pytest.fixture(scope="session")
@@ -15,8 +15,8 @@ def spark_session():
 
 # Fixture to load sample data
 @pytest.fixture
-def sample_data():
-    return pd.DataFrame({
+def sample_data(spark_session):
+    pandas_sample = pd.DataFrame({
         'age': [30, 40, 50, 60, 30, 40, 50, 60, 30, 40, 50, 60],
         'gender': [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
         'height': [160, 170, 165, 175, 160, 170, 165, 175, 160, 170, 165, 175],
@@ -30,16 +30,28 @@ def sample_data():
         'active': [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
         'cardio': [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
     })
+
+    spark_sample = spark_session.createDataFrame(pandas_sample)
+
+    return spark_sample
     
-def test_prepare_dataset_spark(spark_session, sample_data):  
-    trainingData, testData = prepare_dataset_spark(spark_session, sample_data)
+def test_prepare_dataset_spark(spark_session, sample_data):
+    cols_to_impute = ['age', 'gender', 'height', 'weight', 'ap_hi', 'ap_lo', 'cholesterol', 'gluc', 'smoke', 'alco', 'active', 'cardio']
+
+    # Load your data and preprocess it
+    cleaned_df = _clean_dataset(sample_data, cols_to_impute)
+    processed_df = _attribute_combination(cleaned_df)
+
+    # Prepare training and test data
+    trainingData, testData, _, _, _, _ = _prepare_train_test(spark_session, processed_df)
+
     assert trainingData.count() > 0
     assert testData.count() > 0
     return trainingData, testData
 
 def test_training(spark_session, sample_data):
-    train_data, test_data = prepare_dataset_spark(spark_session, sample_data)
-    accuracy, fpr, tpr, auc, f1, _, _ = training(spark_session, 'Decision Tree', train_data, test_data)
+    train_data, test_data = test_prepare_dataset_spark(spark_session, sample_data)
+    accuracy, fpr, tpr, auc, f1, _, _ = _training(spark_session, 'Decision Tree', train_data, test_data)
     assert accuracy >= 0
     assert fpr >= 0
     assert tpr >= 0

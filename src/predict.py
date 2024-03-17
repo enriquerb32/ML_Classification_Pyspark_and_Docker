@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from pyspark.ml.classification import DecisionTreeClassifier, RandomForestClassifier
 from pyspark.ml.feature import Imputer, VectorAssembler
 from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql.functions import col, round, lit
+from pyspark.sql.functions import col, round, lit, udf
 from pyspark.ml.stat import Correlation
 from pyspark.sql.types import DoubleType
 from pyspark.mllib.evaluation import MulticlassMetrics
@@ -70,4 +70,13 @@ def _predictor(spark, df):
     # Make predictions
     predictions = cv_models.transform(df_replicated)
 
-    return predictions
+    # Define a UDF to extract the probability of the positive class
+    extract_positive_prob = udf(lambda probability: float(probability[1]), DoubleType())
+
+    # Apply the UDF to the "probability" column to extract the probability of the positive class
+    predictions = predictions.withColumn("probability_cardio", extract_positive_prob("probability"))
+
+    # Collect predictions into a Pandas DataFrame
+    predictions_pd = predictions.select('age', 'probability_cardio').toPandas()
+
+    return predictions_pd
