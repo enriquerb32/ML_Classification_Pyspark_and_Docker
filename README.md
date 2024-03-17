@@ -2,7 +2,7 @@
 
 # Streamlit Healthcare Machine Learning Data App
 
-![](extra/StreamlitML.gif)
+![](extra/Demo.png)
 
 ## Objective
 The aim of this project is to build a PySpark ML model to analyze medical data for predictive purposes. Therefore, the data preprocessing includes transformations of its variables to improve the explainability of the entire model. Despite our main focus on PySpark, most of the calculations and plots are replicated using Scikit Learn ML packages. This approach allows us to identify differences in the statistical results by simply changing the Python packages. PySpark modules utilize Decision Tree and Random Forest algorithms, while Scikit Learn incorporates these two algorithms as well as SVM and XGBoost.
