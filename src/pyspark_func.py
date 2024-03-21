@@ -165,7 +165,7 @@ def _predictor(spark, df):
     columns_to_drop = ['weight', 'height', 'ap_hi', 'ap_lo']
     df_new = df_new.drop(*columns_to_drop)
 
-    # Generate a range of ages from the imputed age to 100 with a step of 1 between elements
+    # Generate a range of ages from 40 to 66, which englobes the full range of ages on the input data
     agerange = list(range(40, 66))
 
     # Replicate new data for each age
