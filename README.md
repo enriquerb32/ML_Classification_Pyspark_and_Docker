@@ -27,7 +27,7 @@ The aim of this project is to build a PySpark ML model to analyze medical data f
 1. Clone the repository
  ```buildoutcfg
 git clone https://github.com/enriquerb32/ML_Classification_Pyspark_and_Docker.git
-cd streamlit-healthcare-ml-app
+cd ML_Classification_Pyspark_and_Docker
 ``` 
 2. Build and run the docker image
 ```buildoutcfg
